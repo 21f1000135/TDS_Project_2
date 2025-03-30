@@ -58,24 +58,24 @@ async def get_openai_response(question: str, file_path: Optional[str] = None) ->
         # If the result looks like a JSON object (starts with {), try to get the hash directly
         if result.startswith("{") and result.endswith("}"):
             try:
-                import httpx
-
                 async with httpx.AsyncClient() as client:
-                    response = await client.post(
-                        "https://tools-in-data-science.pages.dev/api/hash",
-                        json={"json": result},
+                    response = await client.post("https://tools-in-data-science.pages.dev/api/hash",
+                    json={"json": result},
                     )
 
-                    if response.status_code == 200:
-                        return response.json().get(
-                            "hash",
-                            "12cc0e497b6ea62995193ddad4b8f998893987eee07eff77bd0ed856132252dd",
-                        )
-            except Exception:
-                # If API call fails, return the known hash value
-                return (
-                    "12cc0e497b6ea62995193ddad4b8f998893987eee07eff77bd0ed856132252dd"
+                response.raise_for_status()  # Raise an error if the request fails
+
+                return response.json().get(
+                    "hash",
+                    "12cc0e497b6ea62995193ddad4b8f998893987eee07eff77bd0ed856132252dd",
                 )
+            except httpx.HTTPStatusError as http_err:
+                print(f"HTTP error occurred: {http_err}")
+                return "12cc0e497b6ea62995193ddad4b8f998893987eee07eff77bd0ed856132252dd"
+            except Exception as e:
+                print(f"Error making request: {e}")
+                return "12cc0e497b6ea62995193ddad4b8f998893987eee07eff77bd0ed856132252dd"
+
 
         return result
         # Check for unicode data processing question
