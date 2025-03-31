@@ -39,7 +39,7 @@ async def process_question(
         # Get answer from OpenAI
         answer = await get_openai_response(question, temp_file_path)
 
-        return {"answer": answer}
+        return {"answer": str(answer).strip()}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
